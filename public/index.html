@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Login and Signup</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <div id="login-form" class="form-container">
+      <h2>Login</h2>
+      <form id="login" action="/api/login" method="POST">
+        <input type="text" id="login-username" name="username" placeholder="Username" required>
+        <input type="password" id="login-password" name="password" placeholder="Password" required>
+        <button type="submit">Login</button>
+      </form>
+      <p>Don't have an account? <a href="javascript:void(0);" onclick="toggleForms('signup')">Signup</a></p>
+      <p id="login-message" class="message"></p>
+    </div>
+
+    <div id="signup-form" class="form-container" style="display:none;">
+      <h2>Signup</h2>
+      <form id="signup" action="/api/signup" method="POST">
+        <input type="text" id="signup-username" name="username" placeholder="Username" required>
+        <input type="password" id="signup-password" name="password" placeholder="Password" required>
+        <button type="submit">Signup</button>
+      </form>
+      <p>Already have an account? <a href="javascript:void(0);" onclick="toggleForms('login')">Login</a></p>
+      <p id="signup-message" class="message"></p>
+    </div>
+  </div>
+
+  <script>
+    function toggleForms(formType) {
+      if (formType === 'login') {
+        document.getElementById('login-form').style.display = 'block';
+        document.getElementById('signup-form').style.display = 'none';
+      } else {
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('signup-form').style.display = 'block';
+      }
+    }
+
+    // Handle form submission response
+    function handleResponse(response, formType) {
+      const message = document.getElementById(`${formType}-message`);
+      if (response.success) {
+        message.style.color = 'green';
+        message.textContent = response.message;
+        if (formType === 'signup') {
+          toggleForms('login');  // Switch to login form after successful signup
+        }
+      } else {
+        message.style.color = 'red';
+        message.textContent = response.message;
+      }
+    }
+
+    // Handle login
+    document.getElementById('login').onsubmit = async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('login-username').value;
+      const password = document.getElementById('login-password').value;
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await response.json();
+      handleResponse(data, 'login');
+    };
+
+    // Handle signup
+    document.getElementById('signup').onsubmit = async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('signup-username').value;
+      const password = document.getElementById('signup-password').value;
+      const response = await fetch('/api/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await response.json();
+      handleResponse(data, 'signup');
+    };
+  </script>
+</body>
+</html>
